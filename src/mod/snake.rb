@@ -6,7 +6,7 @@ module Snake
   require_relative 'req.rb'
   # this class is for player controlled entities
   class Player
-    attr_reader :crashed
+    attr_reader :crashed, :tail
     def initialize(map_width, map_hieght, pos_x = 10, pos_y = 10, size = 5, color = 'purple')
       @pos_x = pos_x
       @pos_y = pos_y
@@ -67,16 +67,21 @@ module Snake
     end
 
     def update
-      detect_crash
+      crash if detect_crash
       @tail.push([@pos_x, @pos_y])
       @pos_x += (@spd_x * @speed)
       @pos_y += (@spd_y * @speed)
     end
 
-    def detect_crash
-      crash if @tail.detect { |e| @tail.count(e) > 1 } # hit own tail
-      crash if @pos_x < 0 || @pos_y < 0 # snake outside lower bounds
-      crash if @pos_x > @map_width || @pos_y > @map_hieght
+    def detect_crash(other_tail = [])
+      # hit a tail
+      if @tail.detect { |e| @tail.count(e) > 1 || other_tail.include?(e) }
+        return true
+      end
+      # snake outside lower bounds
+      return true if @pos_x.negative? || @pos_y.negative?
+      # snake outside upper bounds
+      return true if @pos_x > @map_width || @pos_y > @map_hieght
     end
 
     def crash
@@ -84,8 +89,17 @@ module Snake
     end
 
     def info
-      puts "Crashed? #{@crashed} Position: [#{@pos_x},#{@pos_y}]" \
-           " Direction [#{@spd_x},#{@spd_y}]"
+      puts "#{self.class.to_s.upcase} | Crashed? #{@crashed}" \
+      " Position: [#{@pos_x},#{@pos_y}]" \
+      " Direction [#{@spd_x},#{@spd_y}]"
     end
+  end
+  # this is the ai controlled snake
+  class Computer < Player
+    def initialize(map_width, map_hieght, pos_x = 10, pos_y = 20, size = 5, color = 'yellow')
+      super
+    end
+
+    def look_around(other_tail); end
   end
 end
