@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
 require_relative './src/mod/req.rb'
+require_relative './src/mod/snake.rb'
 set title: 'xxTron'
 
-Square.new(
-  x: 10, y: 10,
-  size: 10,
-  color: 'purple',
-  z: 10
-)
+player = Snake::Player.new
+player.draw
 show # displays the window
