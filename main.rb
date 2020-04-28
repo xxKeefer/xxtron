@@ -15,8 +15,9 @@ update do
   player.crash if player.detect_crash(computer.tail)
   player.update
   computer.crash if computer.detect_crash(player.tail)
+  computer.avoid_collision(player.tail)
   computer.update
-  clear if player.crashed
+  # clear if player.crashed
   # player.info
   player.draw
   computer.draw
