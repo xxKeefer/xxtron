@@ -67,7 +67,6 @@ module Snake
     end
 
     def update
-      crash if detect_crash
       @tail.push([@pos_x, @pos_y])
       @pos_x += (@spd_x * @speed)
       @pos_y += (@spd_y * @speed)
