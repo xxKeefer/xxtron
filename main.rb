@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ruby2d'
+require_relative './src/mod/req.rb'
 set title: 'xxTron'
 
 Square.new(
