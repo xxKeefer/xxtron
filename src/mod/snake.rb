@@ -29,12 +29,16 @@ module Snake
       case dir
       when 'w'
         go_up
+        puts 'Turning: UP'
       when 'a'
         go_left
+        puts 'Turning: LEFT'
       when 's'
         go_down
+        puts 'Turning: DOWN'
       when 'd'
         go_right
+        puts 'Turning: RIGHT'
       end
     end
 
@@ -106,64 +110,61 @@ module Snake
     end
 
     def avoid_collision(other_tail)
-      horz = %w[a d]
-      vert = %w[w s]
-      # avoid walls
-      turn(horz.sample) if @pos_y <= 10
-      turn(vert.sample) if @pos_x <= 10
-      turn(horz.sample) if @pos_y >= @map_hieght - 10
-      turn(vert.sample) if @pos_x >= @map_width - 10
-      # avoid tails
-      turn(horz.sample) if collide_up?(other_tail)
-      turn(vert.sample) if collide_left?(other_tail)
-      turn(horz.sample) if collide_down?(other_tail)
-      turn(vert.sample) if collide_right?(other_tail)
-
-      puts "COLLISIONS: w/#{collide_up?(other_tail)} a/#{collide_left?(other_tail)} s/#{collide_down?(other_tail)} d/#{collide_right?(other_tail)}"
+      steer = %w[w a s d]
+      steer.reject! { |dir| dir == 'w' } unless cango_up?(other_tail)
+      steer.reject! { |dir| dir == 'a' } unless cango_left?(other_tail)
+      steer.reject! { |dir| dir == 's' } unless cango_down?(other_tail)
+      steer.reject! { |dir| dir == 'd' } unless cango_right?(other_tail)
+      if on_edge?
+        puts "Snake on EDGE! options: #{steer.inspect}"
+        turn(steer.sample) if steer.length < 2
+      elsif steer.length < 3
+        turn(steer.sample)
+      end
     end
 
-    def collide_up?(other_tail)
-      return false unless @spd_y.negative?
-
-      # next position
-      check = @pos_y - (@spd_y * @speed)
-      # true is hits own tail
-      return true if @tail.include?([@pos_x, check])
-      # true is hits own other_tail
-      return true if other_tail.include?([@pos_x, check])
+    def cango_up?(other_tail)
+      unless @pos_y - @speed < 0 || @tail.include?([@pos_x, @pos_y - @speed]) || other_tail.include?([@pos_x, @pos_y - @speed])
+        true
+      end
     end
 
-    def collide_left?(other_tail)
-      return false unless @spd_x.negative?
-
-      # next position
-      check = @pos_x - (@spd_x * @speed)
-      # true is hits own tail
-      return true if @tail.include?([check, @pos_y])
-      # true is hits own other_tail
-      return true if other_tail.include?([check, @pos_y])
+    def cango_down?(other_tail)
+      unless @pos_y + @speed > @map_hieght - @size || @tail.include?([@pos_x, @pos_y + @speed]) || other_tail.include?([@pos_x, @pos_y + @speed])
+        true
+      end
     end
 
-    def collide_down?(other_tail)
-      return false unless @spd_y.positive?
-
-      # next position
-      check = @pos_y + (@spd_y * @speed)
-      # true is hits own tail
-      return true if @tail.include?([@pos_x, check])
-      # true is hits own other_tail
-      return true if other_tail.include?([@pos_x, check])
+    def cango_left?(other_tail)
+      unless @pos_x - @speed < 0 || @tail.include?([@pos_x - @speed, @pos_y]) || other_tail.include?([@pos_x - @speed, @pos_y])
+        true
+      end
     end
 
-    def collide_right?(other_tail)
-      return false unless @spd_x.positive?
+    def cango_right?(other_tail)
+      unless @pos_x + @speed > @map_width - @size || @tail.include?([@pos_x + @speed, @pos_y]) || other_tail.include?([@pos_x + @speed, @pos_y])
+        true
+      end
+    end
 
-      # next position
-      check = @pos_x + (@spd_x * @speed)
-      # true is hits own tail
-      return true if @tail.include?([check, @pos_y])
-      # true is hits own other_tail
-      return true if other_tail.include?([check, @pos_y])
+    def on_edge?
+      return true if onedge_up? || onedge_left? || onedge_down? || onedge_right?
+    end
+
+    def onedge_up?
+      return true if @spd_y.zero? && @pos_y.zero?
+    end
+
+    def onedge_down?
+      return true if @spd_y.zero? && @pos_y == @map_hieght - @size
+    end
+
+    def onedge_left?
+      return true if @spd_x.zero? && @pos_x.zero?
+    end
+
+    def onedge_right?
+      return true if @spd_x.zero? && @pos_x == @map_hieght - @size
     end
   end
 end
